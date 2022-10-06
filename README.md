@@ -15,7 +15,7 @@ Project Organization
     │   ├── processed      <- The final, canonical data sets for modeling.
     │   └── raw            <- The original, immutable data dump.
     │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
+    ├── docs               <- A Jupyter Book project; live link > [https://carsv2.github.io/cars-v2/](https://carsv2.github.io/cars-v2/)
     │
     ├── models             <- Trained and serialized models, model predictions, or model summaries
     │
