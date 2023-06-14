@@ -1,0 +1,121 @@
+[global_attributes]
+Conventions                  = CF-1.6,IMOS-1.4
+acknowledgement              = 
+author                       = Rebecca Cowley
+author_email                 = Rebecca.Cowley@csiro.au
+citation                     = 
+data_centre                  = Australian Institute of Marine Science (AIMS)
+disclaimer                   = 
+featureType                  = profile
+geospatial_vertical_positive = down
+geospatial_vertical_units    = metres
+license                      = 
+project                      = CSIRO Atlas of Regional Seas (CARS)
+quality_control_set          = 1.0
+references                   = http://www.meds-sdmm.dfo-mpo.gc.ca/meds/Databases/OCEAN/wmocodes_e.htm; http://www.meds-sdmm.dfo-mpo.gc.ca/meds/Databases/OCEAN/GTSPPcodes_e.htm; http://woce.nodc.noaa.gov/woce_v3/wocedata_1/woce-uot/overview.htm; https://www.nodc.noaa.gov/GTSPP/document/codetbls/gtsppcode.html
+source                       = Conductivity Temperature Depth (CTD)
+standard_name_vocabulary     = NetCDF Climate and Forecast (CF) Metadata Convention Standard Name Table 27
+
+[TIME]
+calendar            = gregorian
+units               = days since 1950-01-01 00:00:00 UTC
+ancillary_variables = TIME_quality_control
+axis                = T
+
+[TIME_quality_control]
+long_name                   = quality flags for time
+standard_name               = time status_flag
+quality_control_conventions = IMOS standard flags
+
+[LATITUDE]
+reference_datum     = geographical coordinates, WGS84 projection
+ancillary_variables = LATITUDE_quality_control
+axis                = Y
+
+[LONGITUDE]
+reference_datum     = geographical coordinates, WGS84 projection
+ancillary_variables = LONGITUDE_quality_control
+axis                = X
+
+[DEPTH]
+reference_datum     = sea surface
+standard_name       = depth
+longname            = depth
+units               = m
+valid_min           = -5.
+valid_max           = 12000. 
+ancillary_variables = DEPTH_quality_control
+axis                = Z
+positive            = down
+
+[DEPTH_quality_control]
+long_name                   = quality flags for depth
+standard_name               = depth status_flag
+quality_control_conventions = IMOS standard flags
+
+[TEMP]
+long_name                 = sea_water_temperature
+standard_name             = sea_water_temperature
+units                     = Celsius
+valid_min                 = -2.5
+valid_max                 = 40. 
+coordinates               = TIME LATITUDE LONGITUDE DEPTH
+ancillary_variables       = TEMP_quality_control
+axis                      = Z
+positive                  = down
+
+[TEMP_quality_control]
+long_name                   = quality flag for sea_water_temperature
+standard_name               = sea_water_temperature status_flag
+quality_control_conventions = IMOS standard flags
+
+[PRES_REL]
+long_name                 = sea_water_pressure_due_to_sea_water
+standard_name             = sea_water_pressure_due_to_sea_water
+units                     = dbar
+valid_min                 = -15
+valid_max                 = 12000. 
+coordinates               = TIME LATITUDE LONGITUDE DEPTH
+ancillary_variables       = PRES_REL_quality_control
+axis                      = Z
+positive                  = down
+
+[PRES_REL_quality_control]
+long_name                   = quality flags for pres_rel
+standard_name               = pres_rel status_flag
+quality_control_conventions = IMOS standard flags
+
+[PSAL]
+long_name                 = sea_water_salinity
+standard_name             = sea_water_salinity
+units                     = 1
+valid_min                 = 2
+valid_max                 = 41. 
+coordinates               = TIME LATITUDE LONGITUDE DEPTH
+ancillary_variables       = PSAL_quality_control
+axis                      = Z
+positive                  = down
+
+[PSAL_quality_control]
+long_name                   = quality flag for sea_water_salinity
+standard_name               = sea_water_salinity status_flag
+quality_control_conventions = IMOS standard flags
+
+[DOXY]
+long_name                 = mass_concentration_of_oxygen_in_sea_water
+standard_name             = mass_concentration_of_oxygen_in_sea_water
+units                     = kg m-3
+valid_min                 = 0
+valid_max                 = 29. 
+coordinates               = TIME LATITUDE LONGITUDE DEPTH
+ancillary_variables       = DOXY_quality_control
+axis                      = Z
+positive                  = down
+
+[DOXY_quality_control]
+long_name                   = quality flag for mass_concentration_of_oxygen_in_sea_water
+standard_name               = mass_concentration_of_oxygen_in_sea_water status_flag
+quality_control_conventions = IMOS standard flags
+
+
+
