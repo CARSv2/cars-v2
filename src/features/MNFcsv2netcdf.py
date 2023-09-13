@@ -7,6 +7,7 @@ import pandas as pd
 import datetime as dt
 from pathlib import Path
 import os
+import sys
 import gsw
 import numpy as np
 from netCDF4 import Dataset, date2num
@@ -20,8 +21,8 @@ def convert2nc(MNF_data_path):
     vardict = dict(zip(mnfnames, imosnames))
     vardict2 = dict(zip(imosnames, mnfnames))
     print(vardict)
-    imosglobnames = ['cruise', 'station', 'project', 'site_code', 'unique_code']
-    mnfglobnames = ['SURVEY_NAME', 'STATION', 'PROJECT_NAME', 'MARLIN_ID', 'MARLIN_UUID']
+    imosglobnames = ['cruise', 'station', 'project', 'unique_code']
+    mnfglobnames = ['SURVEY_NAME', 'STATION', 'PROJECT_NAME', 'MARLIN_UUID']
     globdict = dict(zip(mnfglobnames, imosglobnames))
     print(globdict)
 
@@ -41,7 +42,7 @@ def convert2nc(MNF_data_path):
     # each MNF file contains multiple casts
     for filn in filelist:
         # read the data:
-        df = pd.read_csv(filn, on_bad_lines='warn', low_memory=False)
+        df = pd.read_csv(filn, error_bad_lines=False, low_memory=False)
 
         # the parameter names vary from file to file
         dfgroup = df.groupby(['SURVEY_NAME', 'STATION'])
@@ -125,3 +126,10 @@ def convert2nc(MNF_data_path):
                     setattr(output_netcdf_obj, globdict[value], var)
                     # do the date/time stamps individually
                 setattr(output_netcdf_obj, 'date_created', dt.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"))
+
+if __name__ == '__main__':
+    if len(sys.argv) < 1:
+        raise RuntimeError("Need to include the input file path name")
+
+    # call the converter
+    convert2nc(sys.argv[1])
