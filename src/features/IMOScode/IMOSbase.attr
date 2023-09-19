@@ -1,0 +1,82 @@
+# Default netCDF attributes for all IMOS data
+# This file also sets the order of the attributes in the file.
+
+
+:project = "Integrated Marine Observing System (IMOS)"
+:Conventions = "CF-1.6,IMOS-1.3"
+
+:title = ""
+:institution = "" 
+:abstract = "" 
+:keywords = "" 
+:comment = ""
+:naming_authority = "IMOS"
+:references = "http://www.imos.org.au" 
+
+:date_created = "" 
+:netcdf_version = "3.6" 
+:file_version = "Level 0 - Raw data" ;
+:file_version_quality_control = "Raw data is defined as unprocessed data and data products that have not undergone quality control. The data may be in engineering units or physical units, time and locations details can be in relative units and values can be pre-calibration measurements. Level 0 data is not suitable for public access within IMOS." ;
+:quality_control_set = ""
+:history = ""
+
+:source = "" 
+:instrument = "" 
+
+:site_code = "" 
+:platform_code = "" 
+:deployment_code = "" 
+:instrument_serial_number = "" 
+:instrument_sample_interval = "" 
+:instrument_burst_interval = ""
+:instrument_burst_duration = ""
+
+:geospatial_lat_min = ""
+:geospatial_lat_max = ""
+:geospatial_lon_min = ""
+:geospatial_lon_max = ""
+
+:instrument_nominal_height = ""
+:instrument_nominal_depth = ""
+:site_nominal_depth = ""
+:geospatial_vertical_min = ""
+:geospatial_vertical_max = ""
+
+:local_time_zone = ""
+:time_deployment_start = "" 
+:time_deployment_end = "" 
+:time_coverage_start = "" 
+:time_coverage_end = "" 
+
+:data_centre = "eMarine Information Infrastructure (eMII)" 
+:data_centre_email = "info@emii.org.au" 
+:author_email = "" 
+:author = "" 
+:principal_investigator = "" 
+:principal_investigator_email = "" 
+:institution_references = "" 
+
+:citation = The citation in a list of references is: IMOS [year-of-data-download], [Title], [data-access-url], accessed [date-of-access] 
+:acknowledgement = Any users of IMOS data are required to clearly acknowledge the source of the material in the format: "Data was sourced from the Integrated Marine Observing System (IMOS) - IMOS is supported by the Australian Government through the National Collaborative Research Infrastructure Strategy (NCRIS) and the Super Science Initiative (SSI)".
+:distribution_statement = Data may be re-used, provided that related metadata explaining the data has been reviewed by the user, and the data is appropriately acknowledged. Data, products and services from IMOS are provided "as is" without any warranty as to fitness for a particular purpose. 
+:project_acknowledgement = The collection of this data was funded by IMOS. 
+
+
+
+### variable attributes not defined in imostParameters.txt
+
+# Standard dimensions
+
+TIME:units = "days since 1950-01-01 00:00:00 UTC" 
+TIME:axis = "T" 
+TIME:calendar = "gregorian" 
+
+LATITUDE:axis = "Y" 
+LATITUDE:reference_datum = "geographical coordinates, WGS84 projection" 
+
+LONGITUDE:axis = "X" 
+LONGITUDE:reference_datum = "geographical coordinates, WGS84 projection" 
+
+DEPTH:axis = "Z" 
+DEPTH:positive = "down" 
+DEPTH:reference_datum = "sea surface" 
