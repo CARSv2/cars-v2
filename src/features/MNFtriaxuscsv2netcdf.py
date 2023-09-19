@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# convert the csv file of MNF data extracted from the Data Trawler to netCDF
+# convert the Seasoar and triaxus csv file of MNF data extracted from the Data Trawler to netCDF
+# the data is continuous, not in profiles. THINK ABOUT THIS A BIT MORE. I thought it would give me profile data,
+# might go back to the trawler and just download selected profile files in nc format rather than do this conversion
 
 import pandas as pd
 import datetime as dt
@@ -17,12 +19,12 @@ from generate_netcdf_att import generate_netcdf_att, get_imos_parameter_info
 def convert2nc(MNF_data_path):
     # set up dictionaries to map the cast dimensioned names to the MNF names
     imosnames = ['TEMP', 'PRES_REL', 'PSAL']
-    mnfnames = ['TEMPERATURE', 'PRESSURE', 'SALINITY']
+    mnfnames = ['Temperature', 'Pressure', 'Salinity']
     vardict = dict(zip(mnfnames, imosnames))
     vardict2 = dict(zip(imosnames, mnfnames))
     print(vardict)
-    imosglobnames = ['cruise', 'station', 'project', 'unique_code']
-    mnfglobnames = ['SURVEY_NAME', 'STATION', 'PROJECT_NAME', 'MARLIN_UUID']
+    imosglobnames = ['cruise', 'instrument','leg', 'project', 'unique_code']
+    mnfglobnames = ['Survey', 'Instrument','Leg', 'Project', 'MarLIN UUID']
     globdict = dict(zip(mnfglobnames, imosglobnames))
     print(globdict)
 
@@ -45,7 +47,7 @@ def convert2nc(MNF_data_path):
         df = pd.read_csv(filn, error_bad_lines=False, low_memory=False)
 
         # the parameter names vary from file to file
-        dfgroup = df.groupby(['SURVEY_NAME', 'STATION'])
+        dfgroup = df.groupby(['Survey', 'Leg'])
 
         for deployment, data in dfgroup:
             # set up the output file name:
@@ -56,18 +58,18 @@ def convert2nc(MNF_data_path):
             conf_file_generic = '/generate_nc_file_attMNF'
 
             # get the other coordinates
-            lat = data['START_LAT'].unique()
+            lat = data['Latitude'].unique()
             # check for more than one lat/lon/time value, skip
             if len(lat) > 1:
                 print(['Multiple location information: ' + outfile
                        ])
                 continue
-            lon = data['START_LON'].unique()
-            time = dt.datetime.strptime(data['START_TIME'].unique().item(), '%d-%b-%Y %H:%M:%S')
-            botdepth = data['BOTTOM_DEPTH'].unique()
+            lon = data['Longitude'].unique()
+            time = dt.datetime.strptime(data['Time (UTC)'].unique().item(), '%d-%b-%Y %H:%M:%S')
+            botdepth = data['Water Depth'].unique()
 
             # get the coordinate/depth dimension
-            pres = data['PRESSURE']
+            pres = data['Pressure']
             depth = -gsw.z_from_p(pres, lat)
 
             # create a netcdf object and write depth,time,lat,long to it:

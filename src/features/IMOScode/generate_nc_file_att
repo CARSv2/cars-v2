@@ -4,7 +4,7 @@ acknowledgement              =
 author                       = Rebecca Cowley
 author_email                 = Rebecca.Cowley@csiro.au
 citation                     = 
-data_centre                  = Australian Institute of Marine Science (AIMS)
+data_centre                  =
 disclaimer                   = 
 featureType                  = profile
 geospatial_vertical_positive = down
@@ -52,6 +52,16 @@ positive            = down
 long_name                   = quality flags for depth
 standard_name               = depth status_flag
 quality_control_conventions = IMOS standard flags
+
+[BOT_DEPTH]
+reference_datum     = sea surface
+standard_name       = sea_floor_depth_below_sea_surface
+longname            = sea_floor_depth_below_sea_surface
+units               = m
+valid_min           = -5.
+valid_max           = 12000.
+axis                = Z
+positive            = down
 
 [TEMP]
 long_name                 = sea_water_temperature
