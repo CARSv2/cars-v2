@@ -20,7 +20,7 @@ def convert_txt2nc(MNF_data_path):
     print(globdict)
 
     # read a file with the global attributes included and the nc configuration file
-    conf_file_generic = '/tube1/cow074/Documents/cars-v2/src/features/IMOScode/generate_nc_file_attMNF'
+    conf_file_generic = '/Users/cow074/code/CARS/cars-v2/src/features/IMOScode/generate_nc_file_attMNF'
 
     # FLAGS
     #
@@ -136,13 +136,14 @@ def convert_txt2nc(MNF_data_path):
                 # check here if all flags for this parameter are missing, then no data, so skip writing it out
                 if all(flag == 9):
                     print('Empty flags for ' + outfile + value)
-                    continue
+                    # continue
                 if value in vardict:
                     name = vardict[value]
                     # check here for fluorescence values > 30 which makes them a different unit
                     if 'FLU2' in name:
-                        if (max(dat) > 30) & (flag[dat == max(dat)][0] == 1): # good data above max for FLU2
-                            name = 'FLUP'
+                        if (max(dat) > 40):
+                            if (flag[dat == max(dat)][0] == 1): # good data above max for FLU2
+                                name = 'FLUP'
                     # create the variable & QC variable:
                     output_netcdf_obj.createVariable(name, "f", ["PRES_REL"],
                                                      fill_value=get_imos_parameter_info(name, '_FillValue'))
