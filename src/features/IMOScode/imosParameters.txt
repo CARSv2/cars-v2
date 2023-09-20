@@ -55,7 +55,8 @@ DOXY_TEMP,           1, temperature_of_sensor_for_oxygen_in_sea_water,          
 DRYT,                0, dry_bulb_temperature,                                                                   Celsius,                               M, 999999.0, ,        ,         float
 DYNHT,               0, dynamic_height,                                                                         m,                                     E, 999999.0, ,        ,         float
 ECUR,                0, error_sea_water_velocity,                                                               m s-1,                                 V, 999999.0, -5.0,    5.0,      float
-FLU2,                0, fluorescence_in_sea_water,                                                              counts,                                B, 999999.0, ,        ,         float
+FLU2,                0, fluorescence_in_sea_water,                                                              mg m-3,                                B, 999999.0, 0,    30,      float
+FLUP,                0, percent_fluorescence_in_sea_water,                                                      percent,                               B, 999999.0, 0,    100,      float
 FREQUENCY,           0, frequency,                                                                              Hz,                                    E, 999999.0, 0.0,     900000.0, float
 GDOP,                0, radar_beam_intersection_angle,                                                          Degrees,                               E, 999999.0, 0.0,     180.0,    float
 HEADING,             1, platform_yaw_angle,                                                                     Degrees clockwise from true North,     E, 999999.0, 0.0,     360.0,    float
@@ -80,7 +81,7 @@ NOMINAL_DEPTH,       1, depth,                                                  
 NTRA,                1, mole_concentration_of_nitrate_in_sea_water,                                             umole l-1,                             K, 999999.0, ,        ,         float
 NTR2,                1, moles_of_nitrate_per_unit_mass_in_sea_water,                                            umole kg-1,                            K, 999999.0, ,        ,         float
 OPBS,                0, optical_backscattering_coefficient,                                                     ,                                      C, 999999.0, ,        ,         float
-PAR,                 1, downwelling_photosynthetic_photon_flux_in_sea_water,                                    umole m-2 s-1,                         F, 999999.0, ,        ,         float
+PAR,                 1, downwelling_photosynthetic_photon_flux_in_sea_water,                                    uE m-2 s-1,                            F, 999999.0, -5,     5000 ,     float
 CPAR,                0, downwelling_corrected_photosynthetic_photon_flux_in_sea_water,                          percent,                               F, 999999.0, 0,       100,      float
 PCO2,                1, surface_partial_pressure_of_carbon_dioxide_in_air,                                      Pascal,                                K, 999999.0, ,        ,         float
 PHOS,                1, moles_of_phosphate_per_unit_mass_in_sea_water,                                          umole kg-1,                            K, 999999.0, ,        ,         float
@@ -130,6 +131,7 @@ SWSH,                1, sea_surface_swell_wave_significant_height,              
 SW_NET,              1, surface_net_upward_shortwave_flux,                                                      W m-2,                                 F, 999999.0, ,        ,         float
 TAU,                 1, magnitude_of_surface_downward_stress,                                                   Pascal,                                F, 999999.0, ,        ,         float
 TEMP,                1, sea_water_temperature,                                                                  Celsius,                               T, 999999.0, -2.5,    40.0,     float
+TRANS,               1, percent_transmittance_of_light_in_seawater,                                             percent,                               U, 999999.0, 0,    100,     float
 TIME,                1, time,                                                                                   days since 1950-01-01 00:00:00 UTC,    ,  999999.0, 0.0,     90000.0,  double
 TURB,                1, sea_water_turbidity,                                                                    1,                                     U, 999999.0, 0.0,     1000.0,   float
 UCUR,                1, eastward_sea_water_velocity,                                                            m s-1,                                 V, 999999.0, -10.0,   10.0,     float
