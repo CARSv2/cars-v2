@@ -20,7 +20,7 @@ def convert_txt2nc(MNF_data_path):
     print(globdict)
 
     # read a file with the global attributes included and the nc configuration file
-    conf_file_generic = '/Users/cow074/code/CARS/cars-v2/src/features/IMOScode/generate_nc_file_attMNF'
+    conf_file_generic = '/tube1/cow074/Documents/cars-v2/src//features/IMOScode/generate_nc_file_attMNF'
 
     # FLAGS
     #
