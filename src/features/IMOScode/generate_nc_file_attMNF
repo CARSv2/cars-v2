@@ -3,7 +3,7 @@ Conventions                  = CF-1.6,IMOS-1.4
 acknowledgement              = We acknowledge the use of the CSIRO Marine National Facility (https://ror.org/01mae9353) in undertaking this research.
 author                       = Rebecca Cowley
 author_email                 = Rebecca.Cowley@csiro.au
-citation                     = Created from data extracted from the CSIRO Data Trawler 16-Jun-2023 13:14 AEST
+citation                     = Created from data extracted by NCMI staff from the CSIRO Oracle Database
 data_centre                  = CSIRO
 disclaimer                   = Data is supplied 'as is' without any warranty or guarantee except as required by law to be given to you.The data may not be free of error, comprehensive, current or appropriate for your particular purpose. You accept all risk and responsibility for its use.
 featureType                  = profile
@@ -32,10 +32,20 @@ reference_datum     = geographical coordinates, WGS84 projection
 ancillary_variables = LATITUDE_quality_control
 axis                = Y
 
+[LATITUDE_quality_control]
+long_name                   = quality flags for latitude
+standard_name               = latitude status_flag
+quality_control_conventions = IMOS standard flags
+
 [LONGITUDE]
 reference_datum     = geographical coordinates, WGS84 projection
 ancillary_variables = LONGITUDE_quality_control
 axis                = X
+
+[LONGITUDE_quality_control]
+long_name                   = quality flags for longitude
+standard_name               = longitude status_flag
+quality_control_conventions = IMOS standard flags
 
 [DEPTH]
 reference_datum     = sea surface
@@ -44,6 +54,7 @@ longname            = depth
 units               = m
 valid_min           = -5.
 valid_max           = 12000. 
+coordinates               = TIME LATITUDE LONGITUDE PRES_REL
 ancillary_variables = DEPTH_quality_control
 axis                = Z
 positive            = down
@@ -54,12 +65,12 @@ standard_name               = depth status_flag
 quality_control_conventions = IMOS standard flags
 
 [TEMP]
-long_name                 = sea_water_temperature
+long_name                 = sea_water_temperature in situ ITS-90 scale
 standard_name             = sea_water_temperature
 units                     = Celsius
 valid_min                 = -2.5
 valid_max                 = 40. 
-coordinates               = TIME LATITUDE LONGITUDE DEPTH
+coordinates               = TIME LATITUDE LONGITUDE PRES_REL
 ancillary_variables       = TEMP_quality_control
 axis                      = Z
 positive                  = down
@@ -69,13 +80,100 @@ long_name                   = quality flag for sea_water_temperature
 standard_name               = sea_water_temperature status_flag
 quality_control_conventions = IMOS standard flags
 
+[DOXY]
+long_name                 = mole_concentration_of_dissolved_molecular_oxygen_in_seawater
+standard_name             = mole_concentration_of_dissolved_molecular_oxygen_in_seawater
+units                     = mol m-3
+valid_min                 = 0.
+valid_max                 = 0.6
+coordinates               = TIME LATITUDE LONGITUDE PRES_REL
+ancillary_variables       = DOXY_quality_control
+axis                      = Z
+positive                  = down
+
+[DOXY_quality_control]
+long_name                   = quality flag for mole_concentration_of_dissolved_molecular_oxygen_in_seawater
+standard_name               = mole_concentration_of_dissolved_molecular_oxygen_in_seawater status_flag
+quality_control_conventions = IMOS standard flags
+
+[TRANS]
+long_name                 = percent_transmittance_of_light_in_seawater
+units                     = percent
+valid_min                 = 0.
+valid_max                 = 100.
+coordinates               = TIME LATITUDE LONGITUDE PRES_REL
+ancillary_variables       = TRANS_quality_control
+axis                      = Z
+positive                  = down
+
+[TRANS_quality_control]
+long_name                   = quality flag for precent_transmittance_of_light_in_seawater
+quality_control_conventions = IMOS standard flags
+
+[FLU2]
+long_name                 = fluorescence_in_sea_water
+units                     = mg m-3
+valid_min                 = 0.
+valid_max                 = 30.
+coordinates               = TIME LATITUDE LONGITUDE PRES_REL
+ancillary_variables       = FLU2_quality_control
+axis                      = Z
+positive                  = down
+
+[FLU2_quality_control]
+long_name                   = quality flag for fluorescence_in_sea_water
+quality_control_conventions = IMOS standard flags
+
+[FLUP]
+long_name                 = percent_fluorescence_in_sea_water
+units                     = percent
+valid_min                 = 0.
+valid_max                 = 100.
+coordinates               = TIME LATITUDE LONGITUDE PRES_REL
+ancillary_variables       = FLUP_quality_control
+axis                      = Z
+positive                  = down
+
+[FLUP_quality_control]
+long_name                   = quality flag for percent_fluorescence_in_sea_water
+quality_control_conventions = IMOS standard flags
+
+[CDOM]
+long_name                 = concentration_of_coloured_dissolved_organic_matter
+standard_name                 = concentration_of_coloured_dissolved_organic_matter
+units                     = ppb
+valid_min                 = 0.
+valid_max                 = 375.
+coordinates               = TIME LATITUDE LONGITUDE PRES_REL
+ancillary_variables       = CDOM_quality_control
+axis                      = Z
+positive                  = down
+
+[CDOM_quality_control]
+long_name                   = quality flag for concentration_of_coloured_dissolved_organic_matter
+quality_control_conventions = IMOS standard flags
+
+[PAR]
+long_name                 = downwelling_photosynthetic_photon_flux_in_sea_water
+standard_name             = downwelling_photosynthetic_photon_flux_in_sea_water
+units                     = uE m-2 s-1
+valid_min                 = -5
+valid_max                 = 5000
+coordinates               = TIME LATITUDE LONGITUDE PRES_REL
+ancillary_variables       = PAR_quality_control
+axis                      = Z
+positive                  = down
+
+[PAR_quality_control]
+long_name                   = quality flag for downwelling_photosynthetic_photon_flux_in_sea_water
+quality_control_conventions = IMOS standard flags
+
 [PRES_REL]
 long_name                 = sea_water_pressure_due_to_sea_water
 standard_name             = sea_water_pressure_due_to_sea_water
 units                     = dbar
 valid_min                 = -15
-valid_max                 = 12000. 
-coordinates               = TIME LATITUDE LONGITUDE DEPTH
+valid_max                 = 12000.
 ancillary_variables       = PRES_REL_quality_control
 axis                      = Z
 positive                  = down
@@ -89,9 +187,9 @@ quality_control_conventions = IMOS standard flags
 long_name                 = sea_water_salinity
 standard_name             = sea_water_salinity
 units                     = 1
-valid_min                 = 2
+valid_min                 = 2.
 valid_max                 = 41. 
-coordinates               = TIME LATITUDE LONGITUDE DEPTH
+coordinates               = TIME LATITUDE LONGITUDE PRES_REL
 ancillary_variables       = PSAL_quality_control
 axis                      = Z
 positive                  = down
