@@ -40,11 +40,12 @@ def write_flags_to_parquet(folder, datasets, CODA_path):
             wod_dataframe.to_parquet(file_name_out)
 
 # set up the input and output file paths
-folder = '/Users/cow074/code/IQuOD/AQC_flag_summaries'
+folder = '/scratch3/cow074/AQC_flag_summaries'
 # list the subdirectories to get the dataset names
 # datasets = sorted(os.listdir(folder))
-datasets = ['XBT']
-CODA_path = '/Volumes/observations/CARSv2_ancillary/CODA/CODAv1/parquet'
+# test with the smallest dataset for 2000
+datasets = ['GLD']
+CODA_path = '/scratch3/cow074/CODAv1/parquet'
 
 # write the flags to the parquet files
 write_flags_to_parquet(folder, datasets, CODA_path)
