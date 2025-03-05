@@ -3,20 +3,17 @@ import dask.dataframe as dd
 from dask.distributed import Client
 
 def write_flags_to_parquet(folder, datasets, CODA_path):
-    client = Client()  # Start a Dask client
+    client = Client(processes=False)  # Start a Dask client
     # loop through the datasets and each OBS/year folder to access the failure.json.tar.gz files
     for dataset in datasets:
         # list the years
-        # open the csv file for this dataset as a dataframe
-        csv_file = os.path.join(folder, dataset + '_summary.csv')
-        df = dd.read_csv(csv_file)     
-        # add column names to the dataframe
-        df.columns = ['wod_unique_cast', 'depthNumber','Temperature_iquodflag']       
-        df = df.sort_values(by=['wod_unique_cast', 'depthNumber'])
-        # optimise data types
-        df['wod_unique_cast'] = df['wod_unique_cast'].astype('int64')
-        df['depthNumber'] = df['depthNumber'].astype('int64')
-        df['Temperature_iquodflag'] = df['Temperature_iquodflag'].astype('int8')
+        # if parquet files are not available, then create them
+        if not os.path.exists(os.path.join(folder, dataset.lower() + '_flags.parquet')):
+            csv_file = os.path.join(folder, dataset + '_summary.csv')
+            parquet_file = os.path.join(folder, dataset.lower() + '_flags.parquet')
+            flags = convert_csv2parquet(csv_file, parquet_file)
+        else:
+            flags = dd.read_parquet(os.path.join(folder, dataset.lower() + '_flags.parquet'))
         # get the years information from the CODA path
         #years = sorted(os.listdir(CODA_path))
         years = ['2000']
@@ -35,11 +32,35 @@ def write_flags_to_parquet(folder, datasets, CODA_path):
             else:
                 continue
             # merge the dataframes on 'wod_unique_cast' and 'depthNumber'
-            wod_dataframe = wod_dataframe.merge(df, on=['wod_unique_cast', 'depthNumber'], how='left')
+            wod_dataframe = dd.merge(wod_dataframe, flags, on=['wod_unique_cast', 'depthNumber'], how='left')
 
             # write the updated parquet file
-            wod_dataframe.to_parquet(file_name_out, file_name='file_name_out', compression='snappy')
-    client.close()  # Close the Dask client
+            try:
+                wod_dataframe.to_parquet(file_name_out, compression='snappy')
+                print(f'Successfully saved Parquet file: {file_name_out}')
+            except Exception as e:
+                print(f"Error saving Parquet file {file_name_out}: {e}")
+    # close the Dask client
+    client.close()
+
+def convert_csv2parquet(csv_file, parquet_file):
+    # open the csv file for this dataset as a dataframe
+    df = dd.read_csv(csv_file)     
+    # add column names to the dataframe
+    df.columns = ['wod_unique_cast', 'depthNumber','Temperature_iquodflag']       
+    df = df.sort_values(by=['wod_unique_cast', 'depthNumber'])
+    # optimise data types
+    df['wod_unique_cast'] = df['wod_unique_cast'].astype('int64')
+    df['depthNumber'] = df['depthNumber'].astype('int64')
+    df['Temperature_iquodflag'] = df['Temperature_iquodflag'].astype('int8')
+    # write the updated parquet file
+    try:
+        print(f'Saving Parquet file: {parquet_file}')
+        df.to_parquet(parquet_file, compression='snappy')
+        print(f'Successfully saved Parquet file: {parquet_file}')
+    except Exception as e:
+        print(f"Error saving Parquet file {parquet_file}: {e}")
+    return df
 
 if __name__ == '__main__':       
     # set up the input and output file paths
