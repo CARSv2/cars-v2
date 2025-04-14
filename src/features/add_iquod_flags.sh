@@ -4,8 +4,8 @@
 #PBS -q normal
 #PBS -l walltime=5:00:00
 #PBS -l mem=100GB
-#PBS -l ncpus=1440
-#PBS -l jobfs=100GB
+#PBS -l ncpus=3024
+#PBS -l jobfs=10GB
 #PBS -l wd
 #PBS -l storage=scratch/es60+gdata/es60
 #PBS -j oe

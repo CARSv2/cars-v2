@@ -118,12 +118,17 @@ if __name__ == '__main__':
     logger = logging.getLogger(__name__)
     # set up the input and output file paths
     folder = '/scratch/es60/rlc599/AQC_summaries'
-    # list the datasets
+    # list the datasets from the folder where datasets are the first three characters of the file names
+    # datasets = sorted(set([f[:3] for f in os.listdir(folder) if f.endswith('.csv')]))
+    # remove the XBT dataset from the list as we have already processed it
+    # datasets.remove('XBT')
     datasets = ['XBT']
     WOD_path = '/scratch/es60/rlc599/WOD'
     out_path = '/scratch/es60/rlc599/IQuOD'
-    # get a list of years from the subdirectories in the WOD path
-    years = sorted(os.listdir(WOD_path))
+    # List only directories in WOD_path
+    years = sorted([d for d in os.listdir(WOD_path) if os.path.isdir(os.path.join(WOD_path, d))])
+    # remove years prior to 1992
+    years = [year for year in years if int(year) >= 1992]
     # years = ['1966']
     # loop through the datasets
     for dataset in datasets:
