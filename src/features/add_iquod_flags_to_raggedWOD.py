@@ -70,8 +70,8 @@ def write_flags_to_wod(flag_file, file_name, out_file):
     ds['Temperature_IQuODflag'] = flags_da
     # update the new variable attributes
     ds['Temperature_IQuODflag'].attrs['long_name'] = 'IQuOD quality flag for temperature'
-    ds['Temperature_IQuODflag'].attrs['flag_values'] = '1, 2, 3, 4'
-    ds['Temperature_IQuODflag'].attrs['flag_meanings'] = 'passed_all_tests High_True_Postive_Rate_test_failed Compromise_test_failed Low_False_Positive_test_failed'
+    ds['Temperature_IQuODflag'].attrs['flag_values'] = '0, 1, 2, 3, 4'
+    ds['Temperature_IQuODflag'].attrs['flag_meanings'] = 'tests_not_run passed_all_tests High_True_Postive_Rate_test_failed Compromise_test_failed Low_False_Positive_test_failed'
     # update the global attributes for summary, id, creator_name, creator_email, project, date_created, date_modified, publisher_name, publisher_email, publisher_url, history
     ds.attrs['summary'] = 'Data for multiple casts from the World Ocean Database with IQuOD quality flags for temperature'
     ds.attrs['id'] = file_name + ',' + ds.attrs['id']
@@ -111,7 +111,7 @@ def convert_csv2parquet(csv_file, parquet_file):
 
 if __name__ == '__main__':
     """
-    spin up cluster, concat, & write
+    Read the WOD netcdf files and add the IQuOD flags to the temperature variable
     """
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.INFO, format=log_fmt)
