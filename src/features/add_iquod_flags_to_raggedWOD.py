@@ -88,7 +88,7 @@ def write_flags_to_wod(flag_file, file_name, out_file):
     # put a cc4.0 license on the dataset
     ds.attrs['license'] = 'https://creativecommons.org/licenses/by/4.0/legalcode'
     # save the modified dataset
-    ds.to_netcdf(out_file)
+    ds.to_netcdf(out_file, engine='h5netcdf')
     logger.info(f"Saved new file with flags: {out_file}")
 
 
