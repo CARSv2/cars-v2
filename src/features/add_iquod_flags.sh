@@ -10,6 +10,6 @@
 #PBS -l storage=scratch/es60+gdata/es60
 #PBS -j oe
 
-. /g/data/es60/rlc599/venvs/cars/bin/activate
+conda activate tabular_oceans
 
-python3 ~/cars-v2/src/features/add_iquod_flags_to_raggedWOD.py
+python ./add_iquod_flags_to_raggedWOD.py
