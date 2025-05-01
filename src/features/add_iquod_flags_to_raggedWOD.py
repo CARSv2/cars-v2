@@ -14,9 +14,11 @@ import pyarrow.dataset as pa_ds
 import dask.dataframe as dd
 from dask.distributed import Client
 import numpy as np
+from netCDF4 import Dataset
+import shutil
 
 
-def write_flags_to_wod(flag_file, file_name, out_file):
+def write_flags_to_wod_xr(flag_file, file_name, out_file):
     # open the netcdf file for this dataset
     ds = xr.open_dataset(file_name)
     # get the unique cast identifiers
@@ -105,6 +107,86 @@ def write_flags_to_wod(flag_file, file_name, out_file):
     logger.info(f"Saved new file with flags: {out_file}")
 
 
+def write_flags_to_wod(flag_file, file_name, out_file):
+    # copy the file  to the output file
+    shutil.copyfile(file_name, out_file)
+    # Open the NetCDF file for reading
+    with Dataset(out_file, 'r') as src:
+        # Read the unique cast identifiers
+        wod_unique_cast = src.variables['wod_unique_cast'][:]
+        # Read the Temperature_IQUODflag variable
+        flags = src.variables['Temperature_IQUODflag'][:]
+        # Read the Temperature_row_size variable
+        row_sizes = src.variables['Temperature_row_size'][:]
+
+        # Create a DataFrame to hold the flags
+        flags_df = pd.DataFrame(flags)
+        flags_df['wod_unique_cast'] = 0
+        flags_df['depthNumber'] = 0
+
+        # Loop over the unique cast identifiers and populate the DataFrame
+        start = 0
+        for i, cast in enumerate(wod_unique_cast):
+            length = row_sizes[i]
+            if np.ma.is_masked(length) or length == 0:
+                logger.info(f"Skipping cast {cast} as no Temperature data")
+                continue
+            flags_df.loc[start:start + int(length) - 1, 'wod_unique_cast'] = cast
+            flags_df.loc[start:start + int(length) - 1, 'depthNumber'] = range(int(length))
+            start += int(length)
+
+    # Read the parquet file and filter it
+    dataset = pa_ds.dataset(flag_file, format="parquet")
+    df_filtered = dataset.to_table(filter=pa_ds.field('wod_unique_cast').isin(wod_unique_cast)).to_pandas()
+
+    # Merge the flags DataFrame with the filtered DataFrame
+    flags_df = flags_df.merge(df_filtered, on=['wod_unique_cast', 'depthNumber'], how='left')
+    flags_df['Temperature_IQUODflag'] = flags_df['Temperature_IQUODflag'].fillna(0).astype('int8')
+
+    # Remove unnecessary columns
+    flags_df = flags_df.drop(columns=['wod_unique_cast', 'depthNumber']).reset_index(drop=True)
+
+    # open the NetCDF file for writing the to the existing *_IQUODflag variables
+    with Dataset(out_file, 'r+') as dst:
+        # Loop over the variables in the NetCDF file
+        for var_name in dst.variables:
+            if var_name.endswith('_IQUODflag'):
+                # Get the variable data
+                var_data = dst.variables[var_name][:]
+                # if this is the temperature variable, then update the data with the flags
+                if var_name == 'Temperature_IQUODflag':
+                    # Update the variable data with the flags
+                    var_data[:] = flags_df['Temperature_IQUODflag'].values
+                else:
+                    # Set the variable data to zero
+                    var_data[:] = 0
+                # Update the attributes for the variable
+                dst.variables[var_name].long_name = 'IQuOD quality flag for ' + var_name[:-10]
+                dst.variables[var_name].flag_values = '0, 1, 2, 3, 4'
+                dst.variables[var_name].flag_meanings = 'tests_not_run passed_all_tests High_True_Postive_Rate_test_failed Compromise_test_failed Low_False_Positive_test_failed'
+                # Set the variable data back to the NetCDF file
+                dst.variables[var_name][:] = var_data
+    # Update the global attributes
+    with Dataset(out_file, 'r+') as dst:    
+        dst.setncatts({
+            'summary': 'Data for multiple casts from the World Ocean Database with IQuOD quality flags for temperature',
+            'id': file_name + ',' + dst.getncattr('id'),
+            'creator_name': dst.getncattr('creator_name') + ', ' + 'CSIRO Environment/Ocean Dynamics',
+            'creator_email': dst.getncattr('creator_email') + ', ' + 'https://www.csiro.au/en/contact',
+            'creator_url': dst.getncattr('creator_url') + ', ' + 'https://www.csiro.au',
+            'project': dst.getncattr('project') + ', ' + 'IQuOD (International Quality-controlled Ocean Database)',
+            'date_created': dst.getncattr('date_created') + ', ' + pd.Timestamp.now().strftime('%Y-%m-%dT%H:%M:%S'),
+            'date_modified': pd.Timestamp.now().strftime('%Y-%m-%dT%H:%M:%S'),
+            'publisher_name': dst.getncattr('publisher_name') + '; ' + 'CSIRO Environment/Ocean Dynamics',
+            'publisher_email': dst.getncattr('publisher_email') + ', ' + 'https://www.csiro.au/en/contact',
+            'publisher_url': dst.getncattr('publisher_url') + ', ' + 'https://www.csiro.au',
+            'history': 'WOD downloaded on January 3, 2025 with IQuOD quality flags added to temperature variable',
+            'license': 'https://creativecommons.org/licenses/by/4.0/legalcode'
+        })
+    # Save the modified dataset
+    logger.info(f"Saved new file with flags: {out_file}")
+
+
 def convert_csv2parquet(csv_file, parquet_file):
     # start a dask client
     client = Client()
@@ -132,17 +214,17 @@ if __name__ == '__main__':
     # set up the input and output file paths
     folder = '/scratch/es60/rlc599/AQC_summaries'
     # list the datasets from the folder where datasets are the first three characters of the file names
-    # datasets = sorted(set([f[:3] for f in os.listdir(folder) if f.endswith('.csv')]))
+    datasets = sorted(set([f[:3] for f in os.listdir(folder) if f.endswith('.csv')]))
     # remove the XBT dataset from the list as we have already processed it
     # datasets.remove('XBT')
-    datasets = ['OSD']
+    # datasets = ['OSD']
     WOD_path = '/scratch/es60/rlc599/IQuOD_WOD'
     out_path = '/scratch/es60/rlc599/IQuOD'
     # List only directories in WOD_path
-    # years = sorted([d for d in os.listdir(WOD_path) if os.path.isdir(os.path.join(WOD_path, d))])
+    years = sorted([d for d in os.listdir(WOD_path) if os.path.isdir(os.path.join(WOD_path, d))])
     # remove years prior to 1992
     # years = [year for year in years if int(year) >= 1992]
-    years = ['1900']
+    # years = ['1900']
     # loop through the datasets
     for dataset in datasets:
         # if parquet files are not available, then create them
