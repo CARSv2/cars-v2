@@ -13,6 +13,7 @@ import xarray as xr
 import pyarrow.dataset as pa_ds
 import dask.dataframe as dd
 from dask.distributed import Client
+import numpy as np
 
 
 def write_flags_to_wod(flag_file, file_name, out_file):
@@ -21,7 +22,7 @@ def write_flags_to_wod(flag_file, file_name, out_file):
     # get the unique cast identifiers
     wod_unique_cast = ds['wod_unique_cast'].values
     # create a new array to hold the flags, that is the same size as the 'Temperature_WODflag' variable
-    flags = ds['Temperature_WODflag'].copy()
+    flags = ds['Temperature_IQUODflag'].copy()
     # create a new dataframe to hold the flags
     flags_df = pd.DataFrame(flags.values)
     # add a column to the dataframe for the cast identifier
@@ -38,8 +39,13 @@ def write_flags_to_wod(flag_file, file_name, out_file):
     # loop over the unique cast identifiers and add the cast identifier to the flags_df for the same number of z_row_size 
     start = 0
     for i, cast in enumerate(wod_unique_cast):
+        # print(i, cast)
         # get the length of the cast
         length = ds['Temperature_row_size'][i].values
+        # if length is Nan or zero, then skip this cast
+        if pd.isna(length) or length == 0:
+            logger.info(f"Skipping cast {cast} as no Temperature data")
+            continue
         # fill the wod_unique_cast column with the cast identifier from the start to start + length
         flags_df['wod_unique_cast'].values[start:start + int(length)] = cast
         # fill the depthNumber column from 0 to length for this cast
@@ -55,9 +61,9 @@ def write_flags_to_wod(flag_file, file_name, out_file):
     flags_df = flags_df.merge(df_filtered, on=['wod_unique_cast', 'depthNumber'], how='left')
 
     # Replace NaN values in the 'Temperature_IQuODflag' column with 0
-    flags_df['Temperature_IQuODflag'] = flags_df['Temperature_IQuODflag'].fillna(0)
+    flags_df['Temperature_IQUODflag'] = flags_df['Temperature_IQUODflag'].fillna(0)
     # convert the 'Temperature_IQuODflag' column to int8
-    flags_df['Temperature_IQuODflag'] = flags_df['Temperature_IQuODflag'].astype('int8')
+    flags_df['Temperature_IQUODflag'] = flags_df['Temperature_IQUODflag'].astype('int8')
     # remove the 'wod_unique_cast' and 'depthNumber' columns
     flags_df = flags_df.drop(columns=['wod_unique_cast', 'depthNumber'])
     # remove the index from the flags_df
@@ -65,13 +71,20 @@ def write_flags_to_wod(flag_file, file_name, out_file):
     # convert the flags_df to a pandas dataframe
     # flags_df = flags_df.compute()
     # convert the flags_df['Temperature_IQuODflag'] column to an xarray data array with all the same dimensions as the original flags variable
-    flags_da = xr.DataArray(flags_df['Temperature_IQuODflag'].values, dims=flags.dims, coords=flags.coords)
-    # add the flags_da to the dataset as a new variable
-    ds['Temperature_IQuODflag'] = flags_da
-    # update the new variable attributes
-    ds['Temperature_IQuODflag'].attrs['long_name'] = 'IQuOD quality flag for temperature'
-    ds['Temperature_IQuODflag'].attrs['flag_values'] = '0, 1, 2, 3, 4'
-    ds['Temperature_IQuODflag'].attrs['flag_meanings'] = 'tests_not_run passed_all_tests High_True_Postive_Rate_test_failed Compromise_test_failed Low_False_Positive_test_failed'
+    flags_da = xr.DataArray(flags_df['Temperature_IQUODflag'].values, dims=flags.dims, coords=flags.coords)
+    # add the flags_da to the dataset for the temperature variable
+    ds['Temperature_IQUODflag'] = flags_da
+
+    # fill the attributes for all variables with the suffix _IQUODflag
+    for var in ds.data_vars:
+        if var.endswith('_IQUODflag'):
+            ds[var].attrs['long_name'] = 'IQuOD quality flag for ' + var[:-10]
+            ds[var].attrs['flag_values'] = '0, 1, 2, 3, 4'
+            ds[var].attrs['flag_meanings'] = 'tests_not_run passed_all_tests High_True_Postive_Rate_test_failed Compromise_test_failed Low_False_Positive_test_failed'
+            # and fill the variable with 0 values if this is not Temperature
+            if var != 'Temperature_IQUODflag':
+                ds[var].values = np.zeros_like(ds[var].values)
+
     # update the global attributes for summary, id, creator_name, creator_email, project, date_created, date_modified, publisher_name, publisher_email, publisher_url, history
     ds.attrs['summary'] = 'Data for multiple casts from the World Ocean Database with IQuOD quality flags for temperature'
     ds.attrs['id'] = file_name + ',' + ds.attrs['id']
@@ -96,14 +109,14 @@ def convert_csv2parquet(csv_file, parquet_file):
     # start a dask client
     client = Client()
     # open the csv file for this dataset as a dataframe using
-    df = dd.read_csv(csv_file, names=['wod_unique_cast', 'depthNumber','Temperature_IQuODflag'], header=None, dtype={'wod_unique_cast': 'int64', 'depthNumber': 'int64', 'Temperature_IQuODflag': 'int8'})
+    df = dd.read_csv(csv_file, names=['wod_unique_cast', 'depthNumber','Temperature_IQUODflag'], header=None, dtype={'wod_unique_cast': 'int64', 'depthNumber': 'int64', 'Temperature_IQUODflag': 'int8'})
     # write the updated parquet file
     try:
-        print(f'Saving Parquet file: {parquet_file}')
+        logger.info(f'Saving Parquet file: {parquet_file}')
         df.to_parquet(parquet_file, compression='snappy')
-        print(f'Successfully saved Parquet file: {parquet_file}')
+        logger.info(f'Successfully saved Parquet file: {parquet_file}')
     except Exception as e:
-        print(f"Error saving Parquet file {parquet_file}: {e}")
+        logger.info(f"Error saving Parquet file {parquet_file}: {e}")
     # close the dask client
     client.close()
     return
@@ -122,14 +135,14 @@ if __name__ == '__main__':
     # datasets = sorted(set([f[:3] for f in os.listdir(folder) if f.endswith('.csv')]))
     # remove the XBT dataset from the list as we have already processed it
     # datasets.remove('XBT')
-    datasets = ['XBT']
-    WOD_path = '/scratch/es60/rlc599/WOD'
+    datasets = ['OSD']
+    WOD_path = '/scratch/es60/rlc599/IQuOD_WOD'
     out_path = '/scratch/es60/rlc599/IQuOD'
     # List only directories in WOD_path
-    years = sorted([d for d in os.listdir(WOD_path) if os.path.isdir(os.path.join(WOD_path, d))])
+    # years = sorted([d for d in os.listdir(WOD_path) if os.path.isdir(os.path.join(WOD_path, d))])
     # remove years prior to 1992
-    years = [year for year in years if int(year) >= 1992]
-    # years = ['1966']
+    # years = [year for year in years if int(year) >= 1992]
+    years = ['1900']
     # loop through the datasets
     for dataset in datasets:
         # if parquet files are not available, then create them
@@ -142,12 +155,12 @@ if __name__ == '__main__':
         # loop through the years
         for year in years:
             # Open the netcdf file for this dataset
-            file_name = os.path.join(WOD_path, year, 'wod_' + dataset.lower() + '_' + year + '.nc')
+            file_name = os.path.join(WOD_path, year, 'iquod_' + dataset.lower() + '_' + year + '.nc')
             if not os.path.exists(file_name):
                 logger.info(f"File not found: {file_name}")
                 continue
             # create the output file name
-            out_file = os.path.join(out_path, year, 'iquod_' + dataset.lower() + '_' + year + '_iquodflags.nc')
+            out_file = os.path.join(out_path, year, 'iquod_' + dataset.lower() + '_' + year + '.nc')
             # check if the output path exists, if not create it
             out_dir = os.path.dirname(out_file)
             if not os.path.exists(out_dir):
