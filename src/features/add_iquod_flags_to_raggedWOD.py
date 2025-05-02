@@ -138,6 +138,8 @@ def write_flags_to_wod(flag_file, file_name, out_file):
     # Read the parquet file and filter it
     dataset = pa_ds.dataset(flag_file, format="parquet")
     df_filtered = dataset.to_table(filter=pa_ds.field('wod_unique_cast').isin(wod_unique_cast)).to_pandas()
+    # remove duplicates from the filtered dataframe where the cast identifier and depth number are the same
+    df_filtered = df_filtered.drop_duplicates(subset=['wod_unique_cast', 'depthNumber'])
 
     # Merge the flags DataFrame with the filtered DataFrame
     flags_df = flags_df.merge(df_filtered, on=['wod_unique_cast', 'depthNumber'], how='left')
@@ -162,7 +164,8 @@ def write_flags_to_wod(flag_file, file_name, out_file):
                     var_data[:] = 0
                 # Update the attributes for the variable
                 dst.variables[var_name].long_name = 'IQuOD quality flag for ' + var_name[:-10]
-                dst.variables[var_name].flag_values = '0, 1, 2, 3, 4'
+                # flag values are byte not string
+                dst.variables[var_name].flag_values = bytearray([0, 1, 2, 3, 4])
                 dst.variables[var_name].flag_meanings = 'tests_not_run passed_all_tests High_True_Postive_Rate_test_failed Compromise_test_failed Low_False_Positive_test_failed'
                 # Set the variable data back to the NetCDF file
                 dst.variables[var_name][:] = var_data
@@ -214,17 +217,17 @@ if __name__ == '__main__':
     # set up the input and output file paths
     folder = '/scratch/es60/rlc599/AQC_summaries'
     # list the datasets from the folder where datasets are the first three characters of the file names
-    datasets = sorted(set([f[:3] for f in os.listdir(folder) if f.endswith('.csv')]))
+    # datasets = sorted(set([f[:3] for f in os.listdir(folder) if f.endswith('.csv')]))
     # remove the XBT dataset from the list as we have already processed it
     # datasets.remove('XBT')
-    # datasets = ['OSD']
+    datasets = ['OSD','PFL','UOR','SUR','XBT']
     WOD_path = '/scratch/es60/rlc599/IQuOD_WOD'
     out_path = '/scratch/es60/rlc599/IQuOD'
     # List only directories in WOD_path
     years = sorted([d for d in os.listdir(WOD_path) if os.path.isdir(os.path.join(WOD_path, d))])
     # remove years prior to 1992
     # years = [year for year in years if int(year) >= 1992]
-    # years = ['1900']
+    # years = ['2001']
     # loop through the datasets
     for dataset in datasets:
         # if parquet files are not available, then create them
